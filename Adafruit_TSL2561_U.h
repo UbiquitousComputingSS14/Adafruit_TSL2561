@@ -136,6 +136,9 @@
 #define TSL2561_CLIPPING_101MS    (37000)
 #define TSL2561_CLIPPING_402MS    (65000)
 
+// Manual timing control bit
+#define TSL2561_MANUAL_TIMING_BIT (0x08)
+
 enum
 {
   TSL2561_REGISTER_CONTROL          = 0x00,
@@ -157,7 +160,8 @@ typedef enum
 {
   TSL2561_INTEGRATIONTIME_13MS      = 0x00,    // 13.7ms
   TSL2561_INTEGRATIONTIME_101MS     = 0x01,    // 101ms
-  TSL2561_INTEGRATIONTIME_402MS     = 0x02     // 402ms
+  TSL2561_INTEGRATIONTIME_402MS     = 0x02,    // 402ms
+  TSL2561_INTEGRATIONTIME_MANUAL    = 0x03     // Manual
 }
 tsl2561IntegrationTime_t;
 
@@ -183,6 +187,10 @@ class Adafruit_TSL2561_Unified : public Adafruit_Sensor {
   /* Unified Sensor API Functions */  
   void getEvent(sensors_event_t*);
   void getSensor(sensor_t*);
+
+  /* Manual timing control */
+  void beginIntegrationCycle();
+  void stopIntegrationCycle(uint16_t *broadband, uint16_t *ir);
 
  private:
   int8_t _addr;

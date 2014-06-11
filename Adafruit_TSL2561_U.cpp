@@ -145,8 +145,10 @@ void Adafruit_TSL2561_Unified::getData (uint16_t *broadband, uint16_t *ir)
     case TSL2561_INTEGRATIONTIME_101MS:
       delay(102);
       break;
-    default:
+    case TSL2561_INTEGRATIONTIME_402MS:
       delay(403);
+      break;
+    default:
       break;
   }
 
@@ -364,7 +366,7 @@ uint32_t Adafruit_TSL2561_Unified::calculateLux(uint16_t broadband, uint16_t ir)
 {
   unsigned long chScale;
   unsigned long channel1;
-  unsigned long channel0;  
+  unsigned long channel0;
   
   /* Make sure the sensor isn't saturated! */
   uint16_t clipThreshold;
@@ -511,4 +513,43 @@ void Adafruit_TSL2561_Unified::getSensor(sensor_t *sensor)
   sensor->max_value   = 17000.0;  /* Based on trial and error ... confirm! */
   sensor->min_value   = 0.0;
   sensor->resolution  = 1.0;
+}
+
+/**************************************************************************/
+/*!
+    @brief  Starts an integration cycle
+*/
+/**************************************************************************/
+void Adafruit_TSL2561_Unified::beginIntegrationCycle()
+{
+  if (!_tsl2561Initialised) begin();
+
+  /* Enable the device by setting the control bit to 0x03 */
+  enable();
+
+  /* Update the timing register */
+  write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING, TSL2561_INTEGRATIONTIME_MANUAL | _tsl2561Gain);
+  write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING, TSL2561_MANUAL_TIMING_BIT | TSL2561_INTEGRATIONTIME_MANUAL | _tsl2561Gain);
+
+  /* Update value placeholders */
+  _tsl2561IntegrationTime = TSL2561_INTEGRATIONTIME_MANUAL;
+}
+
+/**************************************************************************/
+/*!
+    @brief  Stops the integration cycle and returns the luminosity values
+*/
+/**************************************************************************/
+void Adafruit_TSL2561_Unified::stopIntegrationCycle(uint16_t *broadband, uint16_t *ir)
+{
+  /* Check if manual timing is enabled */
+  if (_tsl2561IntegrationTime != TSL2561_INTEGRATIONTIME_MANUAL)
+      return;
+
+  if (!_tsl2561Initialised) begin();
+
+  /* Update the timing register */
+  write8(TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING, _tsl2561IntegrationTime | _tsl2561Gain);
+
+  getData(broadband, ir);
 }
