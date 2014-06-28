@@ -133,23 +133,26 @@ void Adafruit_TSL2561_Unified::disable(void)
 /**************************************************************************/
 void Adafruit_TSL2561_Unified::getData (uint16_t *broadband, uint16_t *ir)
 {
-  /* Enable the device by setting the control bit to 0x03 */
-  enable();
-
-  /* Wait x ms for ADC to complete */
-  switch (_tsl2561IntegrationTime)
+  if(_tsl2561IntegrationTime != TSL2561_INTEGRATIONTIME_MANUAL)
   {
-    case TSL2561_INTEGRATIONTIME_13MS:
-      delay(14);
-      break;
-    case TSL2561_INTEGRATIONTIME_101MS:
-      delay(102);
-      break;
-    case TSL2561_INTEGRATIONTIME_402MS:
-      delay(403);
-      break;
-    default:
-      break;
+    /* Enable the device by setting the control bit to 0x03 */
+    enable();
+
+    /* Wait x ms for ADC to complete */
+    switch (_tsl2561IntegrationTime)
+    {
+        case TSL2561_INTEGRATIONTIME_13MS:
+        delay(14);
+        break;
+        case TSL2561_INTEGRATIONTIME_101MS:
+        delay(102);
+        break;
+        case TSL2561_INTEGRATIONTIME_402MS:
+        delay(403);
+        break;
+        default:
+        break;
+    }
   }
 
   /* Reads a two byte value from channel 0 (visible + infrared) */
